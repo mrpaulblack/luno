@@ -13,6 +13,7 @@
     Dim deck_open_lbl                                   ' label shows current open deck
     Dim deck_open_color_ov As Color                     ' override deck color if deck-open is black card
 
+
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load    ' init, form create event
         Generate_deck()
         Generate_player_deck(User_input())
@@ -140,7 +141,7 @@
             .Size = New Size(listbox_x - 15, 50)
         End With
 
-        Me.Size = New Point((listbox_x * player_num) + listbox_x, listbox_y + 38) ' größe des forms
+        Me.Size = New Point((listbox_x * player_num) + listbox_x, listbox_y + 38) ' set size of forms
 
         Dim btn As Button = Nothing 'onclick event btn
         For Each ctrl As Control In Me.Controls
@@ -173,7 +174,6 @@ Generate_randm:
 
 
 
-
     Private Sub Button_Click(ByVal sender As Object, ByVal e As EventArgs)  ' the actual game, wait for btn press
         Turn(player_ui_listview(player_current).FocusedItem.Index)  ' actual turn, query listview_item_index
 
@@ -186,6 +186,7 @@ Generate_randm:
         Turn_close_cards()
         Turn_open_cards()
     End Sub
+
 
     Private Sub Turn(current_card As Integer)   ' ruleset of game
         If deck_cards(player_deck(current_card, player_current)) = 10 And deck_open_color() = deck_cards_color(player_deck(current_card, player_current)) Then    ' miss a turn, same color
@@ -274,6 +275,7 @@ Generate_randm:
         player_deck_avail(player_current) = player_deck_avail(player_current) - 1   ' set avail of cards per player after every card_add
     End Sub
 
+
     Private Sub Turn_reset_cards()    ' remove listview items -> reset cards for update after each turn and set  open_card_lbl to open_card
         Dim n As Integer
         Array.Clear(player_lvi_items, 0, player_lvi_items.Length)
@@ -292,7 +294,7 @@ Generate_randm:
 
     Private Sub Turn_close_cards()  ' close all cards -> set black site for all player != player_current
         Dim i, n As Integer
-        ReDim player_lvi_items(player_deck_avail.Max(), player_num - 1)  ' 2dimentional listview array (items of listview)
+        ReDim player_lvi_items(player_deck_avail.Max() + 1, player_num - 1)  ' 2dimentional listview array (items of listview)
 
         For i = 0 To player_num - 1
             If i = player_current Then
@@ -313,7 +315,7 @@ Generate_randm:
     End Sub
 
     Private Sub Turn_open_cards()   ' open cards of current player
-        Dim n As Integer
+        Dim n, remem As Integer
 
         For n = 0 To player_deck_avail(player_current)
             player_lvi_items(n, player_current) = New ListViewItem
@@ -325,6 +327,16 @@ Generate_randm:
             End With
             player_ui_listview(player_current).Items.Add(player_lvi_items(n, player_current))
         Next
+
+        remem = n
+        player_lvi_items(remem, player_current) = New ListView
+        With player_lvi_items(remem, player_current)
+            .Text = "+"
+            .BackColor = Color.LightGray
+            .ForeColor = Color.Black
+            .Font = New Font(New FontFamily("Arial"), 12, FontStyle.Regular)
+        End With
+        'player_ui_listview(player_current).Items.Add(player_lvi_items(remem, player_current))
     End Sub
 
     Private Sub Turn_next() ' determine next player
@@ -342,6 +354,18 @@ Generate_randm:
             End If
         End If
     End Sub
+
+
+    Function Win() ' after every turn test if win = true
+        Return If(player_deck_avail(player_current) < 0, True, False)
+    End Function
+
+    Function Reset()    ' close or reset
+        MsgBox("Spieler " & player_current + 1 & " hat gewonnen!")
+        Close()
+        Return True
+    End Function
+
 
     Function Query_card(index As Integer, player As Integer) ' input index and player -> return card
         If deck_cards(player_deck(index, player)) > 9 Then
@@ -409,15 +433,5 @@ Generate_randm:
         Else
             Return deck_cards_color(deck_open)
         End If
-    End Function
-
-    Function Win() ' after every turn test if win = true
-        Return If(player_deck_avail(player_current) < 0, True, False)
-    End Function
-
-    Function Reset()    ' close or reset
-        MsgBox("Spieler " & player_current + 1 & " hat gewonnen!")
-        Close()
-        Return True
     End Function
 End Class
