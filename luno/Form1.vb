@@ -11,6 +11,7 @@
     Dim player_lvi_items(0, 0)                          ' listview items sorted in twodimentional array
     Dim ok                                              ' ok btn
     Dim deck_open_lbl                                   ' label shows current open deck
+    Dim deck_open_color_ov As Color                     ' override deck color if deck-open is black card
 
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load    ' init, form create event
         Generate_deck()
@@ -187,33 +188,33 @@ Generate_randm:
     End Sub
 
     Private Sub Turn(current_card As Integer)   ' ruleset of game
-        If deck_cards(player_deck(current_card, player_current)) = 10 And deck_cards_color(deck_open) = deck_cards_color(player_deck(current_card, player_current)) Then    ' miss a turn, same color
+        If deck_cards(player_deck(current_card, player_current)) = 10 And deck_open_color() = deck_cards_color(player_deck(current_card, player_current)) Then    ' miss a turn, same color
             Card_normal(current_card)
             Card_skip_next()
         ElseIf deck_cards(player_deck(current_card, player_current)) = 10 And deck_cards(deck_open) = 12 Then    ' miss a turn, and open_deck = miss a turn
             Card_normal(current_card)
             Card_skip_next()
-        ElseIf deck_cards(player_deck(current_card, player_current)) = 11 And deck_cards_color(deck_open) = deck_cards_color(player_deck(current_card, player_current)) Then  ' change dir, same color
+        ElseIf deck_cards(player_deck(current_card, player_current)) = 11 And deck_open_color() = deck_cards_color(player_deck(current_card, player_current)) Then  ' change dir, same color
             Card_normal(current_card)
             Card_turndir()
         ElseIf deck_cards(player_deck(current_card, player_current)) = 11 And deck_cards(deck_open) = 11 Then    ' change dir, change dir = deck_open
             Card_normal(current_card)
             Card_turndir()
-        ElseIf deck_cards(player_deck(current_card, player_current)) = 12 And deck_cards_color(deck_open) = deck_cards_color(player_deck(current_card, player_current)) Then  ' +2 and same color
+        ElseIf deck_cards(player_deck(current_card, player_current)) = 12 And deck_open_color() = deck_cards_color(player_deck(current_card, player_current)) Then  ' +2 and same color
             ' +2
             MsgBox("+2")
         ElseIf deck_cards(player_deck(current_card, player_current)) = 12 And deck_cards(deck_open) = 12 Then    ' +2 and +2 = open_deck
             ' +2
             MsgBox("+2")
         ElseIf deck_cards(player_deck(current_card, player_current)) = 13 Then  ' wish next color
-            ' wünscher
-            MsgBox("Wünscher")
+            Card_wish_color()
+            Card_normal(current_card)
         ElseIf deck_cards(player_deck(current_card, player_current)) = 14 Then  ' +4
             ' +4
             MsgBox("+4")
         ElseIf deck_cards(player_deck(current_card, player_current)) = deck_cards(deck_open) Then   ' same num
             Card_normal(current_card)
-        ElseIf deck_cards_color(deck_open) = deck_cards_color(player_deck(current_card, player_current)) Then   ' same color
+        ElseIf deck_open_color() = deck_cards_color(player_deck(current_card, player_current)) Then   ' same color
             Card_normal(current_card)
         Else
             MsgBox("Zug nicht möglich")
@@ -222,7 +223,6 @@ Generate_randm:
 
     Private Sub Card_wish_color()   ' wish next color prompt
         Dim result As Integer
-        Dim result_color As Color
 
         result = ColorPicker.Show(
                     {"Rot", "Gelb", "Grün", "Blau"},
@@ -230,16 +230,14 @@ Generate_randm:
                     "Farbauswahl")
 
         If result = 0 Then  ' setze farbe nach auswahl
-            result_color = Color.Red
+            deck_open_color_ov = Color.Red
         ElseIf result = 1 Then
-            result_color = Color.Yellow
+            deck_open_color_ov = Color.Yellow
         ElseIf result = 2 Then
-            result_color = Color.Green
+            deck_open_color_ov = Color.Green
         ElseIf result = 3 Then
-            result_color = Color.Blue
+            deck_open_color_ov = Color.Blue
         End If
-
-
     End Sub
 
     Private Sub Card_turndir()  ' change turndir to oposite
@@ -285,7 +283,7 @@ Generate_randm:
         Next
 
         With deck_open_lbl  ' set open_card_lbl to open_card query
-            .BackColor = deck_cards_color(deck_open)
+            .BackColor = deck_open_color()
             .ForeColor = Query_color_open()
             .Text = Query_card_open()
             .Font = New Font(New FontFamily("Arial"), 12, FontStyle.Bold)
@@ -396,12 +394,20 @@ Generate_randm:
     End Function
 
     Function Query_color_open()  ' call func -> return contrast foreground-color for deck_open
-        If deck_cards_color(deck_open) = Color.Red Or deck_cards_color(deck_open) = Color.Yellow Then
+        If deck_open_color() = Color.Red Or deck_open_color() = Color.Yellow Then
             Return Color.Black
-        ElseIf deck_cards_color(deck_open) = Color.Green Or deck_cards_color(deck_open) = Color.Blue Then
+        ElseIf deck_open_color() = Color.Green Or deck_open_color() = Color.Blue Then
             Return Color.White
         Else
             Return Color.White   ' default
+        End If
+    End Function
+
+    Private Function deck_open_color()  ' set background color of deck_open
+        If deck_cards(deck_open) = 13 Then
+            Return deck_open_color_ov
+        Else
+            Return deck_cards_color(deck_open)
         End If
     End Function
 
