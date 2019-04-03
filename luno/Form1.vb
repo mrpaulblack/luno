@@ -11,7 +11,7 @@
     Dim player_lvi_items(0, 0)                          ' listview items sorted in twodimentional array
     Dim ok                                              ' ok btn
     Dim deck_open_lbl                                   ' label shows current open deck
-    Dim deck_open_color_ov As Color                     ' override deck color if deck-open is black card
+    Dim Deck_open_color_ov As Color                     ' override deck color if deck-open is black card
 
 
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load    ' init, form create event
@@ -189,19 +189,19 @@ Generate_randm:
 
 
     Private Sub Turn(current_card As Integer)   ' ruleset of game
-        If deck_cards(player_deck(current_card, player_current)) = 10 And deck_open_color() = deck_cards_color(player_deck(current_card, player_current)) Then    ' miss a turn, same color
+        If deck_cards(player_deck(current_card, player_current)) = 10 And Deck_open_color() = deck_cards_color(player_deck(current_card, player_current)) Then    ' miss a turn, same color
             Card_normal(current_card)
             Card_skip_next()
         ElseIf deck_cards(player_deck(current_card, player_current)) = 10 And deck_cards(deck_open) = 12 Then    ' miss a turn, and open_deck = miss a turn
             Card_normal(current_card)
             Card_skip_next()
-        ElseIf deck_cards(player_deck(current_card, player_current)) = 11 And deck_open_color() = deck_cards_color(player_deck(current_card, player_current)) Then  ' change dir, same color
+        ElseIf deck_cards(player_deck(current_card, player_current)) = 11 And Deck_open_color() = deck_cards_color(player_deck(current_card, player_current)) Then  ' change dir, same color
             Card_normal(current_card)
             Card_turndir()
         ElseIf deck_cards(player_deck(current_card, player_current)) = 11 And deck_cards(deck_open) = 11 Then    ' change dir, change dir = deck_open
             Card_normal(current_card)
             Card_turndir()
-        ElseIf deck_cards(player_deck(current_card, player_current)) = 12 And deck_open_color() = deck_cards_color(player_deck(current_card, player_current)) Then  ' +2 and same color
+        ElseIf deck_cards(player_deck(current_card, player_current)) = 12 And Deck_open_color() = deck_cards_color(player_deck(current_card, player_current)) Then  ' +2 and same color
             ' +2
             MsgBox("+2")
         ElseIf deck_cards(player_deck(current_card, player_current)) = 12 And deck_cards(deck_open) = 12 Then    ' +2 and +2 = open_deck
@@ -211,11 +211,11 @@ Generate_randm:
             Card_wish_color()
             Card_normal(current_card)
         ElseIf deck_cards(player_deck(current_card, player_current)) = 14 Then  ' +4
-            ' +4
+            ' Card_wish_color()
             MsgBox("+4")
         ElseIf deck_cards(player_deck(current_card, player_current)) = deck_cards(deck_open) Then   ' same num
             Card_normal(current_card)
-        ElseIf deck_open_color() = deck_cards_color(player_deck(current_card, player_current)) Then   ' same color
+        ElseIf Deck_open_color() = deck_cards_color(player_deck(current_card, player_current)) Then   ' same color
             Card_normal(current_card)
         Else
             MsgBox("Zug nicht möglich")
@@ -231,13 +231,13 @@ Generate_randm:
                     "Farbauswahl")
 
         If result = 0 Then  ' setze farbe nach auswahl
-            deck_open_color_ov = Color.Red
+            Deck_open_color_ov = Color.Red
         ElseIf result = 1 Then
-            deck_open_color_ov = Color.Yellow
+            Deck_open_color_ov = Color.Yellow
         ElseIf result = 2 Then
-            deck_open_color_ov = Color.Green
+            Deck_open_color_ov = Color.Green
         ElseIf result = 3 Then
-            deck_open_color_ov = Color.Blue
+            Deck_open_color_ov = Color.Blue
         End If
     End Sub
 
@@ -275,6 +275,26 @@ Generate_randm:
         player_deck_avail(player_current) = player_deck_avail(player_current) - 1   ' set avail of cards per player after every card_add
     End Sub
 
+    Private Sub Card_add(cards_num As Integer)  ' add cards to playerdeck cards_num -> amount of cards
+        Dim n As Integer ' var for counting
+        Dim r As New Random, randm As Integer ' var for randomize
+        ReDim player_deck(player_deck_avail.Max() + cards_num - 1, player_num - 1) ' size of 2dimentional array redim after card_add
+        MsgBox(CStr(player_deck.Length))
+
+        For n = player_deck_avail(player_current) + 1 To player_deck_avail(player_current) + cards_num + 1 ' content randm player 2dimentional array
+            randm = r.Next(0, deck_cards.Length)
+            If deck_cards_avail(randm) > 0 Then
+                player_deck(n, player_current) = randm
+                MsgBox(CStr(deck_cards_avail.Length) & ", " & CStr(randm))
+                deck_cards_avail(randm) = deck_cards_avail(randm) - 1
+            Else
+                n = n - 1
+            End If
+        Next
+
+        player_deck_avail(player_current) = player_deck_avail(player_current) + cards_num
+    End Sub
+
 
     Private Sub Turn_reset_cards()    ' remove listview items -> reset cards for update after each turn and set  open_card_lbl to open_card
         Dim n As Integer
@@ -285,7 +305,7 @@ Generate_randm:
         Next
 
         With deck_open_lbl  ' set open_card_lbl to open_card query
-            .BackColor = deck_open_color()
+            .BackColor = Deck_open_color()
             .ForeColor = Query_color_open()
             .Text = Query_card_open()
             .Font = New Font(New FontFamily("Arial"), 12, FontStyle.Bold)
@@ -294,7 +314,7 @@ Generate_randm:
 
     Private Sub Turn_close_cards()  ' close all cards -> set black site for all player != player_current
         Dim i, n As Integer
-        ReDim player_lvi_items(player_deck_avail.Max() + 1, player_num - 1)  ' 2dimentional listview array (items of listview)
+        ReDim player_lvi_items(player_deck_avail.Max(), player_num - 1)  ' 2dimentional listview array (items of listview)
 
         For i = 0 To player_num - 1
             If i = player_current Then
@@ -315,7 +335,7 @@ Generate_randm:
     End Sub
 
     Private Sub Turn_open_cards()   ' open cards of current player
-        Dim n, remem As Integer
+        Dim n As Integer
 
         For n = 0 To player_deck_avail(player_current)
             player_lvi_items(n, player_current) = New ListViewItem
@@ -327,16 +347,6 @@ Generate_randm:
             End With
             player_ui_listview(player_current).Items.Add(player_lvi_items(n, player_current))
         Next
-
-        remem = n
-        player_lvi_items(remem, player_current) = New ListView
-        With player_lvi_items(remem, player_current)
-            .Text = "+"
-            .BackColor = Color.LightGray
-            .ForeColor = Color.Black
-            .Font = New Font(New FontFamily("Arial"), 12, FontStyle.Regular)
-        End With
-        'player_ui_listview(player_current).Items.Add(player_lvi_items(remem, player_current))
     End Sub
 
     Private Sub Turn_next() ' determine next player
@@ -418,18 +428,18 @@ Generate_randm:
     End Function
 
     Function Query_color_open()  ' call func -> return contrast foreground-color for deck_open
-        If deck_open_color() = Color.Red Or deck_open_color() = Color.Yellow Then
+        If Deck_open_color() = Color.Red Or Deck_open_color() = Color.Yellow Then
             Return Color.Black
-        ElseIf deck_open_color() = Color.Green Or deck_open_color() = Color.Blue Then
+        ElseIf Deck_open_color() = Color.Green Or Deck_open_color() = Color.Blue Then
             Return Color.White
         Else
             Return Color.White   ' default
         End If
     End Function
 
-    Private Function deck_open_color()  ' set background color of deck_open
+    Private Function Deck_open_color()  ' set background color of deck_open
         If deck_cards(deck_open) = 13 Then
-            Return deck_open_color_ov
+            Return Deck_open_color_ov
         Else
             Return deck_cards_color(deck_open)
         End If
