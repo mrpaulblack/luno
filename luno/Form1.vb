@@ -12,6 +12,7 @@
     Dim ok                                              ' ok btn
     Dim deck_open_lbl                                   ' label shows current open deck
     Dim Deck_open_color_ov As Color                     ' override deck color if deck-open is black card
+    Dim index_card_add As Integer                       ' for saving index of +1 card in index
 
 
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load    ' init, form create event
@@ -188,7 +189,15 @@ Generate_randm:
     End Sub
 
 
-    Private Sub Turn(current_card As Integer)   ' ruleset of game
+    Private Sub Turn(current_card As Integer)   ' actual turn, determine between real cards and +1 card
+        If current_card = index_card_add Then
+            Card_add(1, player_current)
+        Else
+            Turn_ruleset(current_card)
+        End If
+    End Sub
+
+    Private Sub Turn_ruleset(current_card As Integer)   ' ruleset for all actual cards in the game
         If deck_cards(player_deck(current_card, player_current)) = 10 And Deck_open_color() = deck_cards_color(player_deck(current_card, player_current)) Then    ' miss a turn, same color
             Card_normal(current_card)
             Card_skip_next()
@@ -226,9 +235,7 @@ Generate_randm:
     End Sub
 
     Private Sub Card_wish_color()   ' wish next color prompt
-        Dim result As Integer
-
-        result = ColorPicker.Show(
+        Dim result = ColorPicker.Show(
                     {"Rot", "Gelb", "Grün", "Blau"},
                     "Wähle die nächste Farbe:",
                     "Farbauswahl")
@@ -264,7 +271,7 @@ Generate_randm:
         End If
     End Sub
 
-    Function Card_query_next_player()
+    Function Card_query_next_player()   ' call func -> return next player
         If turn_dir = True Then
             If player_current + 1 < player_num Then
                 Return player_current + 1
@@ -347,7 +354,7 @@ Generate_randm:
 
     Private Sub Turn_close_cards()  ' close all cards -> set black site for all player != player_current
         Dim i, n As Integer
-        ReDim player_lvi_items(player_deck_avail.Max(), player_num - 1)  ' 2dimentional listview array (items of listview)
+        ReDim player_lvi_items(player_deck_avail.Max() + 1, player_num - 1)  ' 2dimentional listview array (items of listview)
 
         For i = 0 To player_num - 1
             If i = player_current Then
@@ -380,6 +387,16 @@ Generate_randm:
             End With
             player_ui_listview(player_current).Items.Add(player_lvi_items(n, player_current))
         Next
+
+        player_lvi_items(n, player_current) = New ListViewItem
+        With player_lvi_items(n, player_current)
+            .Text = "+"
+            .BackColor = Color.LightGray
+            .ForeColor = Color.Black
+            .Font = New Font(New FontFamily("Arial"), 12, FontStyle.Regular)
+        End With
+        player_ui_listview(player_current).Items.Add(player_lvi_items(n, player_current))
+        index_card_add = n  ' save last "take a card" card in global var
     End Sub
 
     Private Sub Turn_next() ' determine next player
