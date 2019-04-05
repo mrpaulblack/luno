@@ -1,7 +1,6 @@
-# Luno a maumau fork
+# Luno - a maumau fork
 
-written in visual basic
-fell free to use the code for your own purpose
+feel free to use the code for your own purpose
 
 
 ### whats not working yet
