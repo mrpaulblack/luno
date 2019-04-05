@@ -211,16 +211,17 @@ Generate_randm:
             Card_wish_color()
             Card_normal(current_card)
         ElseIf deck_cards(player_deck(current_card, player_current)) = 14 Then  ' +4
-            ' Card_wish_color()
-            MsgBox("+4")
+            Card_wish_color()
+            Card_normal(current_card)
+            Card_add(4, Card_query_next_player())
+            Card_skip_next()
         ElseIf deck_cards(player_deck(current_card, player_current)) = deck_cards(deck_open) Then   ' same num
             Card_normal(current_card)
         ElseIf Deck_open_color() = deck_cards_color(player_deck(current_card, player_current)) Then   ' same color
             Card_normal(current_card)
-        Else
-            MsgBox("Zug nicht möglich")
+        Else    ' if turn is not allowed
+            MsgBox("Zug nicht möglich, eine Karte ziehen!")
             Card_add(1, player_current)
-            MsgBox("set extra card")
         End If
     End Sub
 
@@ -244,20 +245,40 @@ Generate_randm:
     End Sub
 
     Private Sub Card_turndir()  ' change turndir to oposite
-        If turn_dir = True Then
-            turn_dir = False
-        Else
-            turn_dir = True
-        End If
+        turn_dir = If(turn_dir = True, False, True)
     End Sub
 
     Private Sub Card_skip_next()    ' skip next player
         If turn_dir = True Then
-            player_current = player_current + 1
+            If player_current + 1 < player_num Then
+                player_current = player_current + 1
+            Else
+                player_current = 0
+            End If
         Else
-            player_current = player_current - 1
+            If player_current - 1 >= 0 Then
+                player_current = player_current - 1
+            Else
+                player_current = player_num - 1
+            End If
         End If
     End Sub
+
+    Function Card_query_next_player()
+        If turn_dir = True Then
+            If player_current + 1 < player_num Then
+                Return player_current + 1
+            Else
+                Return 0
+            End If
+        Else
+            If player_current - 1 >= 0 Then
+                Return player_current - 1
+            Else
+                Return player_num - 1
+            End If
+        End If
+    End Function
 
     Private Sub Card_normal(index As Integer)  ' standard add card to open_deck
         Dim n As Integer    ' numvar for loop
@@ -277,10 +298,22 @@ Generate_randm:
         player_deck_avail(player_current) = player_deck_avail(player_current) - 1   ' set avail of cards per player after every card_add
     End Sub
 
-    Private Sub Card_add(cards_num As Integer, player As Integer)  ' add cards to playerdeck cards_num -> amount of cards
-        Dim n As Integer ' var for counting
+    Private Sub Card_add(cards_num As Integer, player As Integer)  ' add cards to playerdeck cards_num -> amount of cards, set player, which gets the cards
+        Dim n, i As Integer ' var for counting
         Dim r As New Random, randm As Integer ' var for randomize
-        ReDim player_deck(player_deck_avail.Max() + cards_num, player_num - 1) ' size of 2dimentional array redim after card_add
+        Dim player_deck_copy(player_deck_avail.Max(), player_num - 1) ' size of 2dimentional array redim after card_add, copy of player_deck
+
+        For n = 0 To player_num - 1     ' copy content of player_deck to player_deck_copy
+            For i = 0 To player_deck_avail.Max()
+                player_deck_copy(i, n) = player_deck(i, n)
+            Next
+        Next
+        ReDim player_deck(player_deck_avail.Max() + cards_num, player_num - 1)
+        For n = 0 To player_num - 1     ' and then back to player_deck after redim to preserve content
+            For i = 0 To player_deck_avail.Max()
+                player_deck(i, n) = player_deck_copy(i, n)
+            Next
+        Next
 
         For n = player_deck_avail(player) + 1 To player_deck_avail(player) + cards_num ' content randm player 2dimentional array
             randm = r.Next(0, deck_cards.Length)
@@ -438,7 +471,7 @@ Generate_randm:
     End Function
 
     Private Function Deck_open_color()  ' set background color of deck_open
-        If deck_cards(deck_open) = 13 Then
+        If deck_cards(deck_open) = 13 Or deck_cards(deck_open) = 14 Then
             Return Deck_open_color_ov
         Else
             Return deck_cards_color(deck_open)
