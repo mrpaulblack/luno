@@ -219,6 +219,8 @@ Generate_randm:
             Card_normal(current_card)
         Else
             MsgBox("Zug nicht möglich")
+            Card_add(1, player_current)
+            MsgBox("set extra card")
         End If
     End Sub
 
@@ -275,24 +277,22 @@ Generate_randm:
         player_deck_avail(player_current) = player_deck_avail(player_current) - 1   ' set avail of cards per player after every card_add
     End Sub
 
-    Private Sub Card_add(cards_num As Integer)  ' add cards to playerdeck cards_num -> amount of cards
+    Private Sub Card_add(cards_num As Integer, player As Integer)  ' add cards to playerdeck cards_num -> amount of cards
         Dim n As Integer ' var for counting
         Dim r As New Random, randm As Integer ' var for randomize
-        ReDim player_deck(player_deck_avail.Max() + cards_num - 1, player_num - 1) ' size of 2dimentional array redim after card_add
-        MsgBox(CStr(player_deck.Length))
+        ReDim player_deck(player_deck_avail.Max() + cards_num, player_num - 1) ' size of 2dimentional array redim after card_add
 
-        For n = player_deck_avail(player_current) + 1 To player_deck_avail(player_current) + cards_num + 1 ' content randm player 2dimentional array
+        For n = player_deck_avail(player) + 1 To player_deck_avail(player) + cards_num ' content randm player 2dimentional array
             randm = r.Next(0, deck_cards.Length)
             If deck_cards_avail(randm) > 0 Then
-                player_deck(n, player_current) = randm
-                MsgBox(CStr(deck_cards_avail.Length) & ", " & CStr(randm))
+                player_deck(n, player) = randm
                 deck_cards_avail(randm) = deck_cards_avail(randm) - 1
             Else
                 n = n - 1
             End If
         Next
 
-        player_deck_avail(player_current) = player_deck_avail(player_current) + cards_num
+        player_deck_avail(player) = player_deck_avail(player) + cards_num
     End Sub
 
 
