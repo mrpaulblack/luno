@@ -15,6 +15,7 @@
     Dim index_card_add As Integer                       ' for saving index of +1 card
 
 
+
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load    ' init, form create event
         Generate_deck()
         Generate_player_deck(User_input())
@@ -25,6 +26,7 @@
         Turn_close_cards()
         Turn_open_cards()
     End Sub
+
 
     Private Sub Generate_deck()    ' generate deck: 11 = aussetzten, 12= change dir, 13= +2, 14 = wünschen, 15= +4
         Dim index As Integer    ' var for loops
@@ -71,6 +73,7 @@
         Next
     End Sub
 
+
     Function User_input()
         player_num = InputBox("Anzahl der Spieler?", "Spieleranzahl", 4)    ' userinput amount of player
         player_cards_num = InputBox("Anzahl der Karten pro Spieler?", "Kartenanzahl", 8)   ' userinput cards per playerdeck default = 8
@@ -94,6 +97,7 @@
             Next
         Next
     End Sub
+
 
     Private Sub Generate_form()
         ReDim player_ui_listview(player_num - 1) ' 1 ListView per player
@@ -153,6 +157,7 @@
         Next
     End Sub
 
+
     Private Sub Generate_defaults()   ' generate first card
         Dim randm, n As Integer
         Dim r As New Random
@@ -175,6 +180,7 @@ Generate_randm:
 
 
 
+
     Private Sub Button_Click(ByVal sender As Object, ByVal e As EventArgs)  ' the actual game, wait for btn press
         Turn(player_ui_listview(player_current).FocusedItem.Index)  ' actual turn, query listview_item_index
 
@@ -189,6 +195,7 @@ Generate_randm:
     End Sub
 
 
+
     Private Sub Turn(current_card As Integer)   ' actual turn, determine between real cards and +1 card
         If current_card = index_card_add Then
             Card_add(1, player_current)
@@ -196,6 +203,7 @@ Generate_randm:
             Turn_ruleset(current_card)
         End If
     End Sub
+
 
     Private Sub Turn_ruleset(current_card As Integer)   ' ruleset for all actual cards in the game
         If deck_cards(player_deck(current_card, player_current)) = 10 And Deck_open_color() = deck_cards_color(player_deck(current_card, player_current)) Then    ' miss a turn, same color
@@ -250,6 +258,7 @@ Generate_randm:
         End If
     End Sub
 
+
     Private Sub Card_wish_color()   ' wish next color prompt
         Dim result = ColorPicker.Show(
                     {"Rot", "Gelb", "Grün", "Blau"},
@@ -267,9 +276,11 @@ Generate_randm:
         End If
     End Sub
 
+
     Private Sub Card_turndir()  ' change turndir to oposite
         turn_dir = If(turn_dir = True, False, True)
     End Sub
+
 
     Private Sub Card_skip_next()    ' skip next player
         If turn_dir = True Then
@@ -287,6 +298,7 @@ Generate_randm:
         End If
     End Sub
 
+
     Function Card_query_next_player()   ' call func -> return next player
         If turn_dir = True Then
             If player_current + 1 < player_num Then
@@ -302,6 +314,7 @@ Generate_randm:
             End If
         End If
     End Function
+
 
     Private Sub Card_normal(index As Integer)  ' standard add card to open_deck
         Dim n As Integer    ' numvar for loop
@@ -320,6 +333,7 @@ Generate_randm:
         player_deck(player_deck_avail(player_current), player_current) = Nothing
         player_deck_avail(player_current) = player_deck_avail(player_current) - 1   ' set avail of cards per player after every card_add
     End Sub
+
 
     Private Sub Card_add(cards_num As Integer, player As Integer)  ' add cards to playerdeck cards_num -> amount of cards, set player, which gets the cards
         Dim n, i As Integer ' var for counting
@@ -352,6 +366,7 @@ Generate_randm:
     End Sub
 
 
+
     Private Sub Turn_reset_cards()    ' remove listview items -> reset cards for update after each turn and set  open_card_lbl to open_card
         Dim n As Integer
         Array.Clear(player_lvi_items, 0, player_lvi_items.Length)
@@ -367,6 +382,7 @@ Generate_randm:
             .Font = New Font(New FontFamily("Arial"), 12, FontStyle.Bold)
         End With
     End Sub
+
 
     Private Sub Turn_close_cards()  ' close all cards -> set black site for all player != player_current
         Dim i, n As Integer
@@ -389,6 +405,7 @@ Generate_randm:
             End If
         Next
     End Sub
+
 
     Private Sub Turn_open_cards()   ' open cards of current player
         Dim n As Integer
@@ -415,6 +432,7 @@ Generate_randm:
         index_card_add = n  ' save last "take a card" card in global var
     End Sub
 
+
     Private Sub Turn_next() ' determine next player
         If turn_dir = True Then
             If player_current + 1 > player_num - 1 Then
@@ -432,15 +450,18 @@ Generate_randm:
     End Sub
 
 
+
     Function Win() ' after every turn test if win = true
         Return If(player_deck_avail(player_current) < 0, True, False)
     End Function
+
 
     Function Reset()    ' close or reset
         MsgBox("Spieler " & player_current + 1 & " hat gewonnen!")
         Close()
         Return True
     End Function
+
 
 
     Function Query_two_plus(player As Integer)  ' check if player has +2 card
@@ -452,6 +473,7 @@ Generate_randm:
         Next
         Return False
     End Function
+
 
     Function Query_card(index As Integer, player As Integer) ' input index and player -> return card
         If deck_cards(player_deck(index, player)) > 9 Then
@@ -473,6 +495,7 @@ Generate_randm:
         End If
     End Function
 
+
     Function Query_card_open() ' call function -> return char
         If deck_cards(deck_open) > 9 Then
             If deck_cards(deck_open) = 10 Then
@@ -493,6 +516,7 @@ Generate_randm:
         End If
     End Function
 
+
     Function Query_color(index As Integer, player As Integer)  ' input index and player -> return contrast foreground-color
         If deck_cards_color(player_deck(index, player)) = Color.Red Or deck_cards_color(player_deck(index, player)) = Color.Yellow Then
             Return Color.Black
@@ -503,6 +527,7 @@ Generate_randm:
         End If
     End Function
 
+
     Function Query_color_open()  ' call func -> return contrast foreground-color for deck_open
         If Deck_open_color() = Color.Red Or Deck_open_color() = Color.Yellow Then
             Return Color.Black
@@ -512,6 +537,7 @@ Generate_randm:
             Return Color.White   ' default
         End If
     End Function
+
 
     Private Function Deck_open_color()  ' set background color of deck_open
         If deck_cards(deck_open) = 13 Or deck_cards(deck_open) = 14 Then
