@@ -12,7 +12,7 @@
     Dim ok                                              ' ok btn
     Dim deck_open_lbl                                   ' label shows current open deck
     Dim Deck_open_color_ov As Color                     ' override deck color if deck-open is black card
-    Dim index_card_add As Integer                       ' for saving index of +1 card in index
+    Dim index_card_add As Integer                       ' for saving index of +1 card
 
 
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load    ' init, form create event
@@ -72,7 +72,7 @@
     End Sub
 
     Function User_input()
-        player_num = InputBox("Anzahl der Spieler?", "Spieleranzahl", 4) ' userinput amount of player
+        player_num = InputBox("Anzahl der Spieler?", "Spieleranzahl", 4)    ' userinput amount of player
         player_cards_num = InputBox("Anzahl der Karten pro Spieler?", "Kartenanzahl", 8)   ' userinput cards per playerdeck default = 8
         Return player_cards_num
     End Function
@@ -211,11 +211,27 @@ Generate_randm:
             Card_normal(current_card)
             Card_turndir()
         ElseIf deck_cards(player_deck(current_card, player_current)) = 12 And Deck_open_color() = deck_cards_color(player_deck(current_card, player_current)) Then  ' +2 and same color
-            ' +2
-            MsgBox("+2")
+            If Query_two_plus(Card_query_next_player()) = True Then
+                MsgBox("next player got also a +2 card. ad up of +2 cards not supported yet")
+                Card_normal(current_card)
+                Card_add(2, Card_query_next_player())
+                Card_skip_next()
+            Else
+                Card_normal(current_card)
+                Card_add(2, Card_query_next_player())
+                Card_skip_next()
+            End If
         ElseIf deck_cards(player_deck(current_card, player_current)) = 12 And deck_cards(deck_open) = 12 Then    ' +2 and +2 = open_deck
-            ' +2
-            MsgBox("+2")
+            If Query_two_plus(Card_query_next_player()) = True Then
+                MsgBox("next player got also a +2 card. ad up of +2 cards not supported yet")
+                Card_normal(current_card)
+                Card_add(2, Card_query_next_player())
+                Card_skip_next()
+            Else
+                Card_normal(current_card)
+                Card_add(2, Card_query_next_player())
+                Card_skip_next()
+            End If
         ElseIf deck_cards(player_deck(current_card, player_current)) = 13 Then  ' wish next color
             Card_wish_color()
             Card_normal(current_card)
@@ -426,6 +442,16 @@ Generate_randm:
         Return True
     End Function
 
+
+    Function Query_two_plus(player As Integer)  ' check if player has +2 card
+        Dim n As Integer
+        For n = 0 To player_deck_avail(player)
+            If player_deck(n, player) = 12 Then
+                Return True
+            End If
+        Next
+        Return False
+    End Function
 
     Function Query_card(index As Integer, player As Integer) ' input index and player -> return card
         If deck_cards(player_deck(index, player)) > 9 Then
